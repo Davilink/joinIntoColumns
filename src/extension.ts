@@ -8,6 +8,15 @@ import * as vscode from 'vscode';
 export function activate(context: vscode.ExtensionContext) {
 	let editor = vscode.window.activeTextEditor;
 
+	enum Reason {
+		Cancelled
+		, NumberInvalidForColumns
+	};
+
+	let ReasonExplication = new Map<Reason, string>();
+	ReasonExplication.set(Reason.Cancelled, "Cancelled by the user.");
+	ReasonExplication.set(Reason.NumberInvalidForColumns, "Invalid number has been enter for the columns.");
+
 	function joinlineIntoColumns(editor, isTrim) {
 		if(!editor) {
 				return;
@@ -16,39 +25,69 @@ export function activate(context: vscode.ExtensionContext) {
 		let _ibo1: vscode.InputBoxOptions = {
 			ignoreFocusOut : true
 			, prompt : "How many columns ?"
-			, placeHolder : "4"
-			, value : "4"
+			, placeHolder : "5"
+			, value : "5"
 		};
 
 		let _ibo2: vscode.InputBoxOptions = {
 			ignoreFocusOut : true
 			, prompt : "What do you to user has joiner"
-			, placeHolder : ""
 		};
 
 		let Sib = vscode.window.showInputBox;
 
 		let selection = editor.selection;
-		let text = editor.document.getText(selection)
+		let text = editor.document.getText(selection);
 
-		Sib(_ibo1).then((str_cols) => {
-			let cols = parseInt(str_cols);
+		let options = {
+			'cols' : 0,
+			'sep' : ""
+		};
 
-			Sib(_ibo2).then((sep) => {
-				let getText = getFnGetText(isTrim);
+		Sib(_ibo1).then((value) => {
+				if(value === undefined) {
+					return Promise.reject(Reason.Cancelled);
+				}
+				else {
+					let number = parseInt(value);
 
-				let arrText = getText(text).split(/\r?\n/g);
+					if(isNaN(number)) {
+						return Promise.reject(Reason.NumberInvalidForColumns);
+					}
+					else {
+						options.cols = number;
 
-				editor.edit((builder) => {						
-					builder.replace(selection
-						, arrText.reduce((prev, cur, index) => {
-								return prev
-									+ (((index+1) % cols == 0) ? "\n" : sep)
-									+ getText(cur);
-							}, getText(arrText.shift()))
-					);
-				});
+						return Promise.resolve(Sib(_ibo2));
+					}
+				}
+		})
+		.then((value) => {
+				if(value === undefined) {
+					return Promise.reject(Reason.Cancelled);
+				}
+				else {
+					options.sep = value;
+					return Promise.resolve();
+				}
+			})
+		.then(() => {
+			let getText = getFnGetText(isTrim);
+
+			let arrText = getText(text).split(/\r?\n/g);
+
+			editor.edit((builder) => {						
+				builder.replace(selection
+					, arrText.reduce((prev, cur, index) => {
+							return prev
+								+ (((index+1) % options.cols == 0) ? "\n" : options.sep)
+								+ getText(cur);
+						}, getText(arrText.shift()))
+				);
 			});
+		}
+		, (reason) => {
+			if(reason != Reason.Cancelled)
+				vscode.window.showErrorMessage(ReasonExplication.get(reason));
 		});
 	}
 
