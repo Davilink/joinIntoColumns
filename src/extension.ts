@@ -40,36 +40,36 @@ export function activate(context: vscode.ExtensionContext) {
 		let text = editor.document.getText(selection);
 
 		let options = {
-			'cols' : 0,
-			'sep' : ""
+			'cols' : 0
+			, 'sep' : ""
 		};
 
 		Sib(_ibo1).then((value) => {
-				if(value === undefined) {
-					return Promise.reject(Reason.Cancelled);
+			if(value === undefined) {
+				return Promise.reject(Reason.Cancelled);
+			}
+			else {
+				let number = parseInt(value);
+
+				if(isNaN(number)) {
+					return Promise.reject(Reason.NumberInvalidForColumns);
 				}
 				else {
-					let number = parseInt(value);
+					options.cols = number;
 
-					if(isNaN(number)) {
-						return Promise.reject(Reason.NumberInvalidForColumns);
-					}
-					else {
-						options.cols = number;
-
-						return Promise.resolve(Sib(_ibo2));
-					}
+					return Promise.resolve(Sib(_ibo2));
 				}
+			}
 		})
 		.then((value) => {
-				if(value === undefined) {
-					return Promise.reject(Reason.Cancelled);
-				}
-				else {
-					options.sep = value;
-					return Promise.resolve();
-				}
-			})
+			if(value === undefined) {
+				return Promise.reject(Reason.Cancelled);
+			}
+			else {
+				options.sep = value;
+				return Promise.resolve();
+			}
+		})
 		.then(() => {
 			let getText = getFnGetText(isTrim);
 
@@ -81,8 +81,8 @@ export function activate(context: vscode.ExtensionContext) {
 							return prev
 								+ (((index+1) % options.cols == 0) ? "\n" : options.sep)
 								+ getText(cur);
-						}, getText(arrText.shift()))
-				);
+						}
+						, getText(arrText.shift())));
 			});
 		}
 		, (reason) => {
