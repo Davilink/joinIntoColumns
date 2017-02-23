@@ -13,8 +13,6 @@
     "activationEvents": [
         "onCommand:joinLineIntoCol.noTrim"
         , "onCommand:joinLineIntoCol.withTrim"
-        , "onCommand:joinLineIntoCol.noTrimWithAlign"
-        , "onCommand:joinLineIntoCol.withTrimWithAlign"
     ],
     "main": "./out/src/extension",
     "contributes": {
@@ -25,14 +23,6 @@
         , {
             "command": "joinLineIntoCol.withTrim"
             , "title": "Join line into columns (with trim)"
-        }
-        , {
-            "command" : "joinLineIntoCol.noTrimWithAlign"
-            , "title" : "Join line into columns (no trim And with Align)"
-        }
-        , {
-            "command" : "joinLineIntoCol.withTrimWithAlign"
-            , "title" : "Join line into columns (With Trim and with Align)"
         }]
     },
     "scripts": {
