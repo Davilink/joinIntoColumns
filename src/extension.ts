@@ -173,16 +173,19 @@ export function activate(context: vscode.ExtensionContext) {
 					return str;
 				}
 		}
+
+		//Adjust the padding, otherwise the largest string would lose a caracter
+		padLength++;
 		
 		let padding = Array(padLength).join(" ");
 		switch(align) {
 			case Align.Right:
 				return (str) => {
-					return (padding+str).slice(-padding.length);
+					return str.length != padLength ? (padding+str).slice(-padding.length) : str;
 				}
 			case Align.Left:
 				return (str) => {
-					return (str+padding).substring(0, padding.length);
+					return str.length != padLength ? (str+padding).substring(0, padding.length) : str;
 				}
 		}
 	}
