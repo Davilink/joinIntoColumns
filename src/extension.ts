@@ -176,11 +176,11 @@ export function activate(context: vscode.ExtensionContext) {
 		
 		let padding = Array(padLength).join(" ");
 		switch(align) {
-			case Align.Left:
+			case Align.Right:
 				return (str) => {
 					return (padding+str).slice(-padding.length);
 				}
-			case Align.Right:
+			case Align.Left:
 				return (str) => {
 					return (str+padding).substring(0, padding.length);
 				}
