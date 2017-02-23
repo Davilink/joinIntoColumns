@@ -173,11 +173,11 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	}
 
-	let command1 = vscode.commands.registerCommand('joinLineIntoCol.noTrim', () => {
+	let command1 = vscode.commands.registerCommand('joinLinesIntoCols.noTrim', () => {
 		joinlineIntoColumns(editor, false);
 	});
 
-	let command2 = vscode.commands.registerCommand('joinLineIntoCol.withTrim', () => {
+	let command2 = vscode.commands.registerCommand('joinLinesIntoCols.withTrim', () => {
 		joinlineIntoColumns(editor, true);
 	});
 

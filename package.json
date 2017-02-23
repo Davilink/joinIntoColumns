@@ -11,18 +11,18 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:joinLineIntoCol.noTrim"
-        , "onCommand:joinLineIntoCol.withTrim"
+        "onCommand:joinLinesIntoCols.noTrim"
+        , "onCommand:joinLinesIntoCols.withTrim"
     ],
     "main": "./out/src/extension",
     "contributes": {
         "commands": [{
-            "command": "joinLineIntoCol.noTrim"
-            , "title": "Join line into columns (no trim)"
+            "command": "joinLinesIntoCols.noTrim"
+            , "title": "Join lines into columns (no trim)"
         }
         , {
-            "command": "joinLineIntoCol.withTrim"
-            , "title": "Join line into columns (with trim)"
+            "command": "joinLinesIntoCols.withTrim"
+            , "title": "Join lines into columns (with trim)"
         }]
     },
     "scripts": {

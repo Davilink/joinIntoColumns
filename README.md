@@ -1,15 +1,15 @@
-# join-line-into-columns README
+# join lines into columns
 
-This extension provide the need to join line into columns.
+This extension provides the functionality to join lines into columns.
 
 ## Features
 
-- separate each line using any string you want as separator, even an empty string.
+- Separate each line using any string you want as separator, even an empty string.
 - Using a trim mecanism to filter out the space and tab from your lines.
 - Align each column by padding with space
 
-\!\[feature Align\]\(images/Align.webm\)
-\!\[feature Trim\]\(images/Trim.webm\)
+![feature Align](images/Align.webm)
+![feature Trim](images/Trim.webm)
 
 ## Requirements
 
@@ -23,6 +23,6 @@ No settings
 
 ### 1.0.0
 
-Initial release of « Join into columns »
+Initial release of « Join lines into columns »
 
 -----------------------------------------------------------------------------------------------------------
