@@ -37,7 +37,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 		let _ibo2: vscode.InputBoxOptions = {
 			ignoreFocusOut : true
-			, prompt : "What do you to user has joiner"
+			, prompt : "What do you want to use has joiner ?"
 		};
 
 		let _qpo1: vscode.QuickPickOptions = {
