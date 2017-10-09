@@ -4,7 +4,7 @@ This extension provides the functionality to join lines into columns.
 
 ## Features
 
-- Separate each line using any string you want as separator, even an empty string.
+- Join each line using any string you want as separator, even an empty string.
 - Using a trim mecanism to filter out the space and tab from your lines.
 - Align each column by padding with space
 
