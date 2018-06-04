@@ -2,13 +2,16 @@
     "name": "join-lines-into-columns",
     "displayName": "join lines into columns",
     "description": "Join multiple lines into columns.",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "publisher": "davilink",
     "engines": {
         "vscode": "^1.5.0"
     },
     "categories": [
         "Other"
+    ],
+    "keywords": [
+        "multi-root ready"
     ],
     "galleryBanner.color": "#4286f4",
     "activationEvents": [
