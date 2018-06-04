@@ -6,8 +6,6 @@ import * as vscode from 'vscode';
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-	let editor = vscode.window.activeTextEditor;
-
 	enum Align {
 		None
 		, Left
@@ -23,7 +21,9 @@ export function activate(context: vscode.ExtensionContext) {
 	ReasonExplication.set(Reason.Cancelled, "Cancelled by the user.");
 	ReasonExplication.set(Reason.InvalidNumberColumns, "Invalid number of columns. Please enter a valid number.");
 
-	function joinlineIntoColumns(editor, isTrim) {
+	async function joinlineIntoColumns(isTrim) {
+		let editor = vscode.window.activeTextEditor;
+
 		if(!editor) {
 				return;
 		}
@@ -174,11 +174,11 @@ export function activate(context: vscode.ExtensionContext) {
 	}
 
 	let command1 = vscode.commands.registerCommand('joinLinesIntoCols.noTrim', () => {
-		joinlineIntoColumns(editor, false);
+		joinlineIntoColumns(false);
 	});
 
 	let command2 = vscode.commands.registerCommand('joinLinesIntoCols.withTrim', () => {
-		joinlineIntoColumns(editor, true);
+		joinlineIntoColumns(true);
 	});
 
 	context.subscriptions.push(command1);
