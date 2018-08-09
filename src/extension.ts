@@ -1,15 +1,17 @@
 'use strict';
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+export function activate(context: vscode.ExtensionContext): void {
 	enum Align {
 		None
 		, Left
 		, Right
+	};
+
+	type Options = {
+		cols: number;
+		sep: string;
+		align: Align
 	};
 
 	enum Reason {
@@ -21,7 +23,7 @@ export function activate(context: vscode.ExtensionContext) {
 	ReasonExplication.set(Reason.Cancelled, "Cancelled by the user.");
 	ReasonExplication.set(Reason.InvalidNumberColumns, "Invalid number of columns. Please enter a valid number.");
 
-	async function joinlineIntoColumns(isTrim) {
+	function joinlineIntoColumns(isTrim) {
 		let editor = vscode.window.activeTextEditor;
 
 		if(!editor) {
@@ -40,6 +42,12 @@ export function activate(context: vscode.ExtensionContext) {
 			, prompt : "What do you want to use has joiner ?"
 		};
 
+		let _ibo3: vscode.InputBoxOptions = {
+			ignoreFocusOut : true
+			, prompt : "What do you want to use has padding (by default it's a space) ?"
+			, value : " "
+		};
+
 		let _qpo1: vscode.QuickPickOptions = {
 			ignoreFocusOut : true
 		};
@@ -51,38 +59,19 @@ export function activate(context: vscode.ExtensionContext) {
 		let text = editor.document.getText(selection);
 
 		let doTrim = getFnDoTrim(isTrim);
-		let doPadding;
+		let doPadding: (str: string, padLength?: number) => string;
 
-		let maxLength = -1;
 		let arrText = [];
 
-		for(let cur of doTrim(text)
-										.split(/\r?\n/g))
-		{
-			//Trim the text if wanted
-			let txt = doTrim(cur);
-
-			//Filter out the empty element
-			if(txt.length == 0) {
-				continue;
-			}
-			
-			//get the largest length
-			if(txt.length > maxLength) {
-				maxLength = txt.length;
-			}
-
-			arrText.push(txt);
-		}
-
-		let options = {
-			'cols' : 0
-			, 'sep' : ""
+		let options: Options = {
+			cols : 0
+			, sep : ""
+			, align: Align.None
 		};
 
 		sip(_ibo1)
 			.then(FnHelperForCancelled((value) => {
-				let number = parseInt(value);
+				let number = parseInt(value, 10);
 
 				if(isNaN(number)) {
 					return Promise.reject(Reason.InvalidNumberColumns);
@@ -90,30 +79,48 @@ export function activate(context: vscode.ExtensionContext) {
 				else {
 					options.cols = number;
 
-					return Promise.resolve(sip(_ibo2));
+					return sip(_ibo2);
 				}
 			}))
 			.then(FnHelperForCancelled((value) => {
 				options.sep = value;
-				return Promise.resolve(value);
-			}))
-			.then(FnHelperForCancelled((value) => {
-				let items = [Align[Align.None], Align[Align.Left], Align[Align.Right]];
-				return Promise.resolve(sqp(items, _qpo1));
-			}))
-			.then(FnHelperForCancelled((value: string) => {
-				doPadding = getFnDoPadding(value, maxLength);
-				return Promise.resolve();
 			}))
 			.then(() => {
-				editor.edit((builder) => {			
+				let items = [Align[Align.None], Align[Align.Left], Align[Align.Right]];
+
+				return sqp(items, _qpo1);
+			})
+			.then(FnHelperForCancelled((alignValue: string) => {
+				options.align = Align[alignValue];
+				if (options.align !== Align.None) {
+					return sip(_ibo3)
+						.then(FnHelperForCancelled((paddingChar: string) => {
+							doPadding = getFnDoPadding(alignValue, paddingChar[0] || paddingChar);
+					}));
+				}
+			}))
+			.then(() => {
+				let paddingLength: number[] = [];
+				doTrim(text)
+					.split(/\r?\n/g)
+					.map(doTrim)
+					.filter(value => value.length !== 0)
+					.forEach((value, i) => {
+						arrText.push(value);
+						if (options.align !== Align.None
+						&& (paddingLength[i % options.cols] === undefined || paddingLength[i % options.cols] < value.length)) {
+							paddingLength[i % options.cols] = value.length;
+						}
+					});
+
+				editor.edit((builder) => {
 					builder.replace(selection
 						, arrText.reduce((prev, cur, index) => {
 								return prev
-									+ (((index+1) % options.cols == 0) ? "\n" : options.sep)
-									+ doPadding(cur);
+									+ (((index+1) % options.cols === 0) ? "\n" : options.sep)
+									+ (options.align === Align.None ? cur : doPadding(cur, paddingLength[(index+1) % options.cols]));
 							}
-							, doPadding(arrText.shift())));
+							, (options.align === Align.None ? arrText.shift() : doPadding(arrText.shift(), paddingLength[0]))));
 				});
 			}
 			, (reason) => {
@@ -121,10 +128,10 @@ export function activate(context: vscode.ExtensionContext) {
 					vscode.window.showErrorMessage(ReasonExplication.get(reason));
 			});
 		}
-	
+
 	// This function allow to avoid to check to each Iteration in loop
 	// is the trim wanted by using a callback mecanism
-	function getFnDoTrim(isTrim) {
+	function getFnDoTrim(isTrim: boolean): (str: string) => string {
 		if(isTrim)
 			return (str) => {
 				return str.trim();
@@ -137,33 +144,25 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// This function allow to avoid to check to each Iteration in loop
 	// what Align mode is wanted by using a callback mecanism
-	function getFnDoPadding(align: string, padLength: number) {
-		if(align == Align[Align.None]) {
-			return (str) => {
-					return str;
-				}
-		}
-
-		//Adjust the padding, otherwise the largest string would lose a caracter
-		padLength++;
-		
-		let padding = Array(padLength).join(" ");
+	function getFnDoPadding(align: string, paddingChars: string): (str: string, padLength?: number) => string {
 		switch(align) {
 			case Align[Align.Right]:
-				return (str) => {
-					return str.length != padLength ? (padding+str).slice(-padding.length) : str;
-				}
+				return (str: string, padLength: number) => {
+					padLength++;
+					return str.length !== padLength ? Array(padLength - str.length).join(paddingChars) + str : str;
+				};
 			case Align[Align.Left]:
-				return (str) => {
-					return str.length != padLength ? (str+padding).substring(0, padding.length) : str;
-				}
+				return (str: string, padLength: number) => {
+					padLength++;
+					return str.length !== padLength ? str + Array(padLength - str.length).join(paddingChars) : str;
+				};
 		}
 	}
 
 	// Instead of checking for the Cancelled Action manually in
 	// each then() call, we use that wrapping helper
 	function FnHelperForCancelled(fn) {
-		return (value) => {
+	return (value) => {
 			if(value === undefined) {
 				return Promise.reject(Reason.Cancelled);
 			}
